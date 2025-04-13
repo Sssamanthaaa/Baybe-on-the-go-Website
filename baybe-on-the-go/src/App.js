@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import PackingList from './pages/PackingList';
 import Header from './components/Header';
+import Sidebar from './components/Sidebar';
 
 const NotFound = () => (
   <div className="w-full text-center">
@@ -17,6 +18,7 @@ function App() {
         <Header />
         
         <main className="flex-grow flex items-center justify-center text-blue-400 px-4">
+          <Sidebar />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/packing-list" element={<PackingList />} />
