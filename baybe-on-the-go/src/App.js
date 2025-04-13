@@ -16,15 +16,16 @@ function App() {
     <BrowserRouter>
       <div className="flex flex-col h-screen">
         <Header />
-        
-        <main className="flex-grow flex items-center justify-center text-blue-400 px-4">
+        <div className="flex flex-1 overflow-hidden">
           <Sidebar />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/packing-list" element={<PackingList />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
+          <main className="flex-1 overflow-y-auto p-4">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/packing-list" element={<PackingList />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
+        </div>
       </div>
     </BrowserRouter>
   );

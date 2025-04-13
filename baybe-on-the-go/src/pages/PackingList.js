@@ -1,7 +1,326 @@
-const PackingList = () => (
-  <div className="w-full text-center">
-    <h1 className="text-4xl font-bold">Packing List</h1>
-  </div>
-);
+import { useReducer, useState } from 'react';
+import { ChevronDown, ChevronUp, X, Plus, Send } from 'lucide-react';
+
+const initialState = {
+  bags: [
+    {
+      id: 'bag-1',
+      bagName: 'Large Suitcase 1',
+      bagHidden: false,
+      bagItems: [
+        { id: 'item-1', itemName: '3 shirts', checked: false },
+        { id: 'item-2', itemName: '3 pants', checked: false },
+        { id: 'item-3', itemName: 'Laptop charger', checked: false },
+        { id: 'item-4', itemName: 'baby diapers (1 pack)', checked: false },
+        { id: 'item-5', itemName: 'Hiking shoes', checked: false },
+        { id: 'item-6', itemName: 'Running shoes', checked: false },
+        { id: 'item-7', itemName: 'Jacket', checked: false },
+        { id: 'item-8', itemName: 'Baby onesie', checked: false },
+      ]
+    },
+    {
+      id: 'bag-2',
+      bagName: 'Small Suitcase 1',
+      bagHidden: true,
+      bagItems: [
+        { id: 'item-9', itemName: 'Camera', checked: false },
+        { id: 'item-10', itemName: 'Passport', checked: false },
+      ]
+    },
+    {
+      id: 'bag-3',
+      bagName: 'Backpack 1',
+      bagHidden: true,
+      bagItems: [
+        { id: 'item-11', itemName: 'Water bottle', checked: false },
+        { id: 'item-12', itemName: 'Snacks', checked: false },
+      ]
+    },
+    {
+      id: 'bag-4',
+      bagName: 'Backpack 2',
+      bagHidden: false,
+      bagItems: [
+        { id: 'item-13', itemName: 'Laptop', checked: true },
+        { id: 'item-14', itemName: 'Charger', checked: true },
+        { id: 'item-15', itemName: 'Mouse', checked: true },
+        { id: 'item-16', itemName: 'Headphones', checked: true },
+        { id: 'item-17', itemName: 'Notebook', checked: true },
+        { id: 'item-18', itemName: 'Pens', checked: true },
+        { id: 'item-19', itemName: 'Wallet', checked: true },
+        { id: 'item-20', itemName: 'Keys', checked: true },
+        { id: 'item-21', itemName: 'Phone', checked: true },
+        { id: 'item-22', itemName: 'Sunglasses', checked: true },
+      ]
+    }
+  ]
+};
+
+// Action types
+const TOGGLE_BAG_VISIBILITY = 'TOGGLE_BAG_VISIBILITY';
+const TOGGLE_ITEM_CHECKED = 'TOGGLE_ITEM_CHECKED';
+const DELETE_ITEM = 'DELETE_ITEM';
+const ADD_ITEM = 'ADD_ITEM';
+const ADD_BAG = 'ADD_BAG';
+const DELETE_BAG = 'DELETE_BAG';
+
+// Reducer function
+function packingListReducer(state, action) {
+  switch (action.type) {
+    case TOGGLE_BAG_VISIBILITY:
+      return {
+        ...state,
+        bags: state.bags.map(bag => 
+          bag.id === action.bagId 
+            ? { ...bag, bagHidden: !bag.bagHidden } 
+            : bag
+        )
+      };
+      
+    case TOGGLE_ITEM_CHECKED:
+      return {
+        ...state,
+        bags: state.bags.map(bag => 
+          bag.id === action.bagId
+            ? {
+                ...bag,
+                bagItems: bag.bagItems.map(item => 
+                  item.id === action.itemId
+                    ? { ...item, checked: !item.checked }
+                    : item
+                )
+              }
+            : bag
+        )
+      };
+      
+    case DELETE_ITEM:
+      return {
+        ...state,
+        bags: state.bags.map(bag => 
+          bag.id === action.bagId
+            ? {
+                ...bag,
+                bagItems: bag.bagItems.filter(item => item.id !== action.itemId)
+              }
+            : bag
+        )
+      };
+      
+    case ADD_ITEM:
+      return {
+        ...state,
+        bags: state.bags.map(bag => 
+          bag.id === action.bagId
+            ? {
+                ...bag,
+                bagItems: [
+                  ...bag.bagItems,
+                  { 
+                    id: `item-${Date.now()}`, 
+                    itemName: action.itemName, 
+                    checked: false 
+                  }
+                ]
+              }
+            : bag
+        )
+      };
+      
+    case ADD_BAG:
+      return {
+        ...state,
+        bags: [
+          ...state.bags,
+          {
+            id: `bag-${Date.now()}`,
+            bagName: `New Bag ${state.bags.length + 1}`,
+            bagHidden: false,
+            bagItems: []
+          }
+        ]
+      };
+
+    case DELETE_BAG:
+      return {
+        ...state,
+        bags: state.bags.filter(bag => bag.id !== action.bagId)
+      };
+      
+    default:
+      return state;
+
+  
+  }
+}
+
+const PackingList = () => {
+  const [state, dispatch] = useReducer(packingListReducer, initialState);
+  const [newItemText, setNewItemText] = useState('');
+  
+  /* Global Metrics */
+  const totalItems = state.bags.reduce((total, bag) => total + bag.bagItems.length, 0);
+  const packedItems = state.bags.reduce((total, bag) => 
+    total + bag.bagItems.filter(item => item.checked).length, 0);
+  const progressPercentage = totalItems > 0 ? (packedItems / totalItems) * 100 : 0;
+  
+  /* Action Dispatchers */
+  const toggleBagVisibility = (bagId) => {
+    dispatch({ type: TOGGLE_BAG_VISIBILITY, bagId });
+  };
+
+  const toggleItemChecked = (bagId, itemId) => {
+    dispatch({ type: TOGGLE_ITEM_CHECKED, bagId, itemId });
+  };
+
+  const deleteItem = (bagId, itemId) => {
+    dispatch({ type: DELETE_ITEM, bagId, itemId });
+  };
+
+  const addItemToBag = (bagId, itemName) => {
+    if (!itemName.trim()) return;
+    dispatch({ type: ADD_ITEM, bagId, itemName });
+    setNewItemText('');
+  };
+
+  const addNewBag = () => {
+    dispatch({ type: ADD_BAG });
+  };
+
+  const deleteBag = (bagId) => {
+    dispatch({ type: DELETE_BAG, bagId });
+  };
+
+  return (
+    <div className="w-full mx-auto bg-white rounded-lg shadow p-4 my-8">
+      {/* Overall Progress */}
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-2">
+          <div className="text-sm font-medium">Overall progress</div>
+          <div className="text-sm">{packedItems}/{totalItems} items packed</div>
+        </div>
+        <div className="h-2 bg-gray-200 rounded-full">
+          <div 
+            className="h-2 bg-blue-500 rounded-full" 
+            style={{ width: `${progressPercentage}%` }}
+          ></div>
+        </div>
+      </div>
+
+      {/* Bags List */}
+      <div className="space-y-4">
+        {state.bags.map((bag, bagIndex) => {
+          // Calculate bag metrics
+          const bagTotal = bag.bagItems.length;
+          const bagPacked = bag.bagItems.filter(item => item.checked).length;
+          
+          return (
+            <div 
+              key={bag.id} 
+              className={`border rounded-lg overflow-hidden ${
+                bagIndex === 3 ? 'bg-green-50 border-green-100' : 'bg-white'
+              }`}
+            >
+              {/* Bag Header */}
+              <div 
+                className="flex items-center justify-between p-4"
+              >
+                <div 
+                  className="flex-grow cursor-pointer"
+                  onClick={() => toggleBagVisibility(bag.id)}
+                >
+                  <h3 className="font-medium">{bag.bagName}</h3>
+                  <p className="text-sm text-gray-500">{bagPacked}/{bagTotal} packed</p>
+                </div>
+                <div className="flex items-center">
+                  <button 
+                    onClick={() => {deleteBag(bag.id)}}
+                    className="text-gray-400 hover:text-red-500 mr-2"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                  <button onClick={() => toggleBagVisibility(bag.id)}>
+                    {bag.bagHidden ? <ChevronDown className="h-5 w-5" /> : <ChevronUp className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Bag Items */}
+              {!bag.bagHidden && (
+                <div className="px-4 pb-4">
+                  <ul className="space-y-2">
+                    {bag.bagItems.map((item) => (
+                      <li key={item.id} className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={item.checked}
+                            onChange={() => toggleItemChecked(bag.id, item.id)}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600"
+                          />
+                          <span className="ml-3">{item.itemName}</span>
+                        </div>
+                        <button 
+                          onClick={() => deleteItem(bag.id, item.id)}
+                          className="text-gray-400 hover:text-gray-600"
+                        >
+                          <X className="h-5 w-5" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Add Item Form */}
+                  <div className="mt-4 flex">
+                    <input
+                      type="text"
+                      placeholder="Add new item..."
+                      className="flex-1 border rounded-l-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      value={newItemText}
+                      onChange={(e) => setNewItemText(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          addItemToBag(bag.id, newItemText);
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={() => addItemToBag(bag.id, newItemText)}
+                      className="bg-blue-500 text-white px-3 py-2 rounded-r-md hover:bg-blue-600"
+                    >
+                      <Plus className="h-5 w-5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Add New Bag Button */}
+      <button
+        onClick={addNewBag}
+        className="mt-4 w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 flex items-center justify-center"
+      >
+        <Plus className="h-5 w-5 mr-1" /> Add New Bag
+      </button>
+
+      {/* Bottom Input Field */}
+      <div className="mt-8 border-t pt-4">
+        <div className="flex items-center rounded-lg border overflow-hidden">
+          <input
+            type="text"
+            placeholder="Ask for changes to the packing list (eg. 'I don't have enough bags') or tell me what you've already packed"
+            className="flex-1 px-4 py-2 focus:outline-none text-sm"
+          />
+          <button className="bg-blue-500 text-white p-2 rounded-full m-1">
+            <Send className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default PackingList;

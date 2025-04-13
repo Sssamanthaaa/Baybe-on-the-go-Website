@@ -17,7 +17,7 @@ const Sidebar = ({ tripName = "Trip Name" }) => {
   ];
 
   return (
-    <div className="h-full bg-gray-50 w-64 shadow-sm">
+    <div className="h-full  bg-gray-50 w-64 shadow-sm">
       {/* Trip Name */}
       <div className="px-4 py-6">
         <h1 className="text-lg font-medium text-gray-700">{tripName}</h1>
