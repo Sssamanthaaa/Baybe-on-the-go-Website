@@ -1,23 +1,30 @@
-import './App.css'; 
+import './App.css';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import PackingList from './pages/PackingList';
+import Header from './components/Header';
+
+const NotFound = () => (
+  <div className="w-full text-center">
+    <h1 className="text-4xl font-bold text-red-500">Error: Page Not Found</h1>
+  </div>
+);
 
 function App() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center text-blue-400">
-      <header className="text-center">
-        <h1 className="text-5xl font-bold mb-6">Welcome to Baybe On The Go!</h1>
-        <p className="text-lg mb-4">
-          Edit <code className="bg-white text-black px-2 py-1 rounded">src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="inline-block mt-4 text-blue-800 underline hover:text-white transition"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React Here
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <div className="flex flex-col h-screen">
+        <Header />
+        
+        <main className="flex-grow flex items-center justify-center text-blue-400 px-4">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/packing-list" element={<PackingList />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+      </div>
+    </BrowserRouter>
   );
 }
 
