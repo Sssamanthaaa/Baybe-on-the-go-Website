@@ -2,6 +2,7 @@ import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import PackingList from './pages/PackingList';
+import DocUpload from './pages/DocUpload';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 
@@ -22,6 +23,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/packing-list" element={<PackingList />} />
+              <Route path="/documentation" element={<DocUpload/>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
