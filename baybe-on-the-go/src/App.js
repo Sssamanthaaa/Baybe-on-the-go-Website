@@ -7,6 +7,7 @@ import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Gallery from './pages/Gallery';
 import PhotoGalleryDetail from './pages/PhotoGalleryDetail';
+import Dashboard from './pages/Dashboard';
 
 
 const NotFound = () => (
@@ -29,6 +30,7 @@ function App() {
               <Route path="/documentation" element={<DocUpload/>} />
               <Route path="/photo-gallery" element={<Gallery />} />
               <Route path="/photo-gallery/:albumId" element={<PhotoGalleryDetail />} />
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
