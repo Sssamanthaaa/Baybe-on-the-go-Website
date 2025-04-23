@@ -5,6 +5,9 @@ import PackingList from './pages/PackingList';
 import DocUpload from './pages/DocUpload';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
+import Gallery from './pages/Gallery';
+import PhotoGalleryDetail from './pages/PhotoGalleryDetail';
+
 
 const NotFound = () => (
   <div className="w-full text-center">
@@ -24,6 +27,8 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/packing-list" element={<PackingList />} />
               <Route path="/documentation" element={<DocUpload/>} />
+              <Route path="/photo-gallery" element={<Gallery />} />
+              <Route path="/photo-gallery/:albumId" element={<PhotoGalleryDetail />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
