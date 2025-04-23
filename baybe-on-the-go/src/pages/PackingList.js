@@ -63,6 +63,7 @@ const DELETE_ITEM = 'DELETE_ITEM';
 const ADD_ITEM = 'ADD_ITEM';
 const ADD_BAG = 'ADD_BAG';
 const DELETE_BAG = 'DELETE_BAG';
+const SET_STATE = 'SET_STATE';
 
 // Reducer function
 function packingListReducer(state, action) {
@@ -146,17 +147,23 @@ function packingListReducer(state, action) {
         ...state,
         bags: state.bags.filter(bag => bag.id !== action.bagId)
       };
+
+    case SET_STATE:
+      return action.newState;
       
     default:
       return state;
-
-  
   }
 }
 
 const PackingList = () => {
   const [state, dispatch] = useReducer(packingListReducer, initialState);
   const [newItemText, setNewItemText] = useState('');
+  const [bottomInputText, setBottomInputText] = useState('');
+  const [previousState, setPreviousState] = useState(null);
+  const [responseMessage, setResponseMessage] = useState('');
+  const [showError, setShowError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   /* Global Metrics */
   const totalItems = state.bags.reduce((total, bag) => total + bag.bagItems.length, 0);
@@ -166,29 +173,86 @@ const PackingList = () => {
   
   /* Action Dispatchers */
   const toggleBagVisibility = (bagId) => {
+    setResponseMessage('');
     dispatch({ type: TOGGLE_BAG_VISIBILITY, bagId });
   };
 
   const toggleItemChecked = (bagId, itemId) => {
+    setResponseMessage('');
     dispatch({ type: TOGGLE_ITEM_CHECKED, bagId, itemId });
   };
 
   const deleteItem = (bagId, itemId) => {
+    setResponseMessage('');
     dispatch({ type: DELETE_ITEM, bagId, itemId });
   };
 
   const addItemToBag = (bagId, itemName) => {
+    setResponseMessage('');
     if (!itemName.trim()) return;
     dispatch({ type: ADD_ITEM, bagId, itemName });
     setNewItemText('');
   };
 
   const addNewBag = () => {
+    setResponseMessage('');
     dispatch({ type: ADD_BAG });
   };
 
   const deleteBag = (bagId) => {
+    setResponseMessage('');
     dispatch({ type: DELETE_BAG, bagId });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setShowError(false);
+    setResponseMessage('');
+    setIsLoading(true);
+    setBottomInputText('');
+
+    try {
+      const response = await fetch(
+        'https://noggin.rea.gent/shared-cheetah-9397',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer rg_v1_tpf8pvj6pg59ttiiqsfr80b5byj43yi5fcil_ngk',
+          },
+          body: JSON.stringify({
+            "userPrompt": bottomInputText,
+            "currentState": JSON.stringify(state),
+          }),
+        }
+      ).then(response => response.text());
+
+      const { updatedState, textResponse } = JSON.parse(response);
+      
+      if (!updatedState) {
+        setShowError(true);
+        setResponseMessage('Sorry, I couldn\'t process your request. Please try again.');
+        return;
+      }
+
+      // Save current state for undo
+      setPreviousState(state);
+      dispatch({ type: SET_STATE, newState: JSON.parse(updatedState) });
+      setResponseMessage(textResponse);
+    } catch (error) {
+      setShowError(true);
+      setResponseMessage('An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUndo = () => {
+    if (previousState) {
+      dispatch({ type: SET_STATE, newState: previousState });
+      setPreviousState(null);
+      setResponseMessage('');
+    }
   };
 
   return (
@@ -218,7 +282,7 @@ const PackingList = () => {
             <div 
               key={bag.id} 
               className={`border rounded-lg overflow-hidden ${
-                bagIndex === 3 ? 'bg-green-50 border-green-100' : 'bg-white'
+                bagPacked === bagTotal && bagTotal > 0 ? 'bg-green-50 border-green-100' : 'bg-white'
               }`}
             >
               {/* Bag Header */}
@@ -278,7 +342,7 @@ const PackingList = () => {
                       className="flex-1 border rounded-l-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
                       value={newItemText}
                       onChange={(e) => setNewItemText(e.target.value)}
-                      onKeyPress={(e) => {
+                      onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           addItemToBag(bag.id, newItemText);
                         }
@@ -308,17 +372,40 @@ const PackingList = () => {
 
       {/* Bottom Input Field */}
       <div className="mt-8 border-t pt-4">
-        <div className="flex items-center rounded-lg border overflow-hidden">
+        <form onSubmit={handleSubmit} className="flex items-center rounded-lg border overflow-hidden">
           <input
             type="text"
-            placeholder="Ask for changes to the packing list (eg. 'I don't have enough bags') or tell me what you've already packed"
+            placeholder="Ask for changes to the packing list (eg. 'I don't have enough bags' or 'check off my Jacket in Large Suitcase 1')"
             className="flex-1 px-4 py-2 focus:outline-none text-sm"
+            value={bottomInputText}
+            onChange={(e) => setBottomInputText(e.target.value)}
           />
-          <button className="bg-blue-500 text-white p-2 rounded-full m-1">
+          <button type="submit" className="bg-blue-500 text-white p-2 rounded-full m-1">
             <Send className="h-5 w-5" />
           </button>
-        </div>
+        </form>
       </div>
+
+      {/* Response Message */}
+      {(responseMessage || showError || isLoading) && (
+        <div className={`mb-4 p-3 rounded-md ${
+          showError ? 'bg-red-50 text-red-700' : 
+          isLoading ? 'bg-gray-50 text-gray-700' : 
+          'bg-blue-50 text-blue-700'
+        }`}>
+          <div className="flex justify-between items-center">
+            <p>{isLoading ? 'Loading...' : responseMessage}</p>
+            {!showError && !isLoading && previousState && (
+              <button
+                onClick={handleUndo}
+                className="text-sm bg-white px-3 py-1 rounded border border-gray-300 hover:bg-gray-50"
+              >
+                Undo Changes
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
