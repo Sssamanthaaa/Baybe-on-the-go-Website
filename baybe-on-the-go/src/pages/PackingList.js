@@ -1,5 +1,6 @@
 import { useReducer, useState } from 'react';
-import { ChevronDown, ChevronUp, X, Plus, Send } from 'lucide-react';
+import { ChevronDown, ChevronUp, X, Plus, Send, FileImage } from 'lucide-react';
+import ImageUploadDialog from '../components/ImageUploadDialog';
 
 const initialState = {
   bags: [
@@ -63,7 +64,7 @@ const DELETE_ITEM = 'DELETE_ITEM';
 const ADD_ITEM = 'ADD_ITEM';
 const ADD_BAG = 'ADD_BAG';
 const DELETE_BAG = 'DELETE_BAG';
-const SET_STATE = 'SET_STATE';
+export const SET_STATE = 'SET_STATE';
 
 // Reducer function
 function packingListReducer(state, action) {
@@ -164,6 +165,7 @@ const PackingList = () => {
   const [responseMessage, setResponseMessage] = useState('');
   const [showError, setShowError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   /* Global Metrics */
   const totalItems = state.bags.reduce((total, bag) => total + bag.bagItems.length, 0);
@@ -206,6 +208,7 @@ const PackingList = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!bottomInputText) return;
     setShowError(false);
     setResponseMessage('');
     setIsLoading(true);
@@ -235,9 +238,11 @@ const PackingList = () => {
         return;
       }
 
-      // Save current state for undo
+      if (textResponse !== "I don't quite understand your prompt") {
       setPreviousState(state);
       dispatch({ type: SET_STATE, newState: JSON.parse(updatedState) });
+      }
+
       setResponseMessage(textResponse);
     } catch (error) {
       setShowError(true);
@@ -372,19 +377,47 @@ const PackingList = () => {
 
       {/* Bottom Input Field */}
       <div className="mt-8 border-t pt-4">
-        <form onSubmit={handleSubmit} className="flex items-center rounded-lg border overflow-hidden">
-          <input
-            type="text"
+        <div className="group relative inline-block">
+          <p className="cursor-help font-semibold text-blue-500 hover:text-blue-700">Use AI to help you pack!</p>
+          <div className="absolute left-0 top-full mt-2 w-64 p-2 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+            <p>You can either use the text input field to make changes to your packing list, whether that be shifting items around between your bags or checking off items.</p>
+            <p className="mt-2">You can also upload an image of a bunch of items you're about to pack, and those items will be checked off!</p>
+          </div>
+        </div>
+        <form onSubmit={handleSubmit} className="flex-col rounded-lg border overflow-hidden mt-4">
+          <textarea
             placeholder="Ask for changes to the packing list (eg. 'I don't have enough bags' or 'check off my Jacket in Large Suitcase 1')"
-            className="flex-1 px-4 py-2 focus:outline-none text-sm"
+            className="w-full px-4 py-2 focus:outline-none text-sm resize-none"
             value={bottomInputText}
             onChange={(e) => setBottomInputText(e.target.value)}
           />
-          <button type="submit" className="bg-blue-500 text-white p-2 rounded-full m-1">
-            <Send className="h-5 w-5" />
-          </button>
+          <div className="flex justify-between">
+            <button 
+              onClick={(e) => {
+                e.preventDefault();
+                setIsDialogOpen(true);
+              }} 
+              className="m-2"
+            >
+              <FileImage className="h-5 w-5" />
+            </button>
+            <button type="submit" className="bg-blue-500 text-white p-2 rounded-full m-2">
+              <Send className="h-5 w-5" />
+            </button>
+          </div>
         </form>
       </div>
+
+      {/* Image Upload Dialog */}
+      <ImageUploadDialog 
+        isOpen={isDialogOpen} 
+        onClose={() => setIsDialogOpen(false)}
+        currentState={state}
+        dispatch={dispatch}
+        setShowError={setShowError}
+        setResponseMessage={setResponseMessage}
+        setPreviousState={setPreviousState}
+      />
 
       {/* Response Message */}
       {(responseMessage || showError || isLoading) && (
