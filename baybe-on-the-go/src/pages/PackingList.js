@@ -250,7 +250,15 @@ const PackingList = () => {
         }
       ).then(response => response.text());
 
-      const { updatedState, textResponse } = JSON.parse(response);
+      // Fix malformed JSON if needed because model struggles sometimes
+      let fixedResponse = response;
+      if (!response.trim().endsWith('"}')) {
+        fixedResponse = response + '"}';
+      }
+
+      const { updatedState, textResponse } = JSON.parse(fixedResponse);
+
+      console.log(updatedState, textResponse)
       
       if (!updatedState) {
         setShowError(true);
