@@ -1,5 +1,5 @@
 import { useReducer, useState } from 'react';
-import { ChevronDown, ChevronUp, X, Plus, Send, FileImage } from 'lucide-react';
+import { ChevronDown, ChevronUp, X, Plus, Send, FileImage, Check } from 'lucide-react';
 import ImageUploadDialog from '../components/ImageUploadDialog';
 
 const initialState = {
@@ -65,6 +65,7 @@ const ADD_ITEM = 'ADD_ITEM';
 const ADD_BAG = 'ADD_BAG';
 const DELETE_BAG = 'DELETE_BAG';
 export const SET_STATE = 'SET_STATE';
+const RENAME_BAG = 'RENAME_BAG';
 
 // Reducer function
 function packingListReducer(state, action) {
@@ -151,6 +152,16 @@ function packingListReducer(state, action) {
 
     case SET_STATE:
       return action.newState;
+
+    case RENAME_BAG:
+      return {
+        ...state,
+        bags: state.bags.map(bag => 
+          bag.id === action.bagId 
+            ? { ...bag, bagName: action.newName } 
+            : bag
+        )
+      };
       
     default:
       return state;
@@ -159,12 +170,21 @@ function packingListReducer(state, action) {
 
 const PackingList = () => {
   const [state, dispatch] = useReducer(packingListReducer, initialState);
+  // for creating new items within a bag
   const [newItemText, setNewItemText] = useState('');
+  // for renaming bags
+  const [renamingBagId, setRenamingBagId] = useState(null);
+  const [renameInput, setRenameInput] = useState('');
+
   const [bottomInputText, setBottomInputText] = useState('');
   const [previousState, setPreviousState] = useState(null);
+  // for displaying responses/errors
   const [responseMessage, setResponseMessage] = useState('');
   const [showError, setShowError] = useState(false);
+
+  // loading for AI text prompt
   const [isLoading, setIsLoading] = useState(false);
+  // dialog for AI image prompt
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   /* Global Metrics */
@@ -260,6 +280,18 @@ const PackingList = () => {
     }
   };
 
+  const renameBag = (bagId, newName) => {
+    setResponseMessage('');
+    dispatch({ type: RENAME_BAG, bagId, newName });
+    setRenamingBagId(null);
+    setRenameInput('');
+  };
+
+  const startRenaming = (bagId, currentName) => {
+    setRenamingBagId(bagId);
+    setRenameInput(currentName);
+  };
+
   return (
     <div className="w-full mx-auto bg-white rounded-lg shadow p-4 my-8">
       {/* Overall Progress */}
@@ -298,7 +330,43 @@ const PackingList = () => {
                   className="flex-grow cursor-pointer"
                   onClick={() => toggleBagVisibility(bag.id)}
                 >
-                  <h3 className="font-medium">{bag.bagName}</h3>
+                  {renamingBagId === bag.id ? (
+                    <div className="flex items-center">
+                      <input
+                        type="text"
+                        value={renameInput}
+                        onChange={(e) => setRenameInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            renameBag(bag.id, renameInput);
+                          }
+                        }}
+                        className="border rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        autoFocus
+                      />
+                      <button
+                        onClick={() => renameBag(bag.id, renameInput)}
+                        className="ml-2 text-green-500 hover:text-green-700"
+                      >
+                        <Check className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center">
+                      <h3 className="font-medium">{bag.bagName}</h3>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startRenaming(bag.id, bag.bagName);
+                        }}
+                        className="ml-2 text-gray-400 hover:text-gray-600"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                   <p className="text-sm text-gray-500">{bagPacked}/{bagTotal} packed</p>
                 </div>
                 <div className="flex items-center">
