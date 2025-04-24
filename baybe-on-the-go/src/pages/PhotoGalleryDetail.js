@@ -1,7 +1,5 @@
 import { useLocation, useParams, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
-import { storage } from '../firebase';
-import { ref, uploadBytes, getDownloadURL, listAll } from 'firebase/storage';
+import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 export default function PhotoGalleryDetail() {
@@ -14,38 +12,45 @@ export default function PhotoGalleryDetail() {
   const [isUploading, setIsUploading] = useState(false);
 
   const handleUpload = async (e) => {
-    const files = Array.from(e.target.files);
+    const formData = new FormData();
+    Array.from(e.target.files).forEach((file) => {
+      formData.append('files', file);
+    });
+
     setIsUploading(true);
 
-    const uploaded = await Promise.all(
-      files.map(async (file) => {
-        const fileRef = ref(storage, `albums/${albumId}/${file.name}`);
-        await uploadBytes(fileRef, file);
-        const url = await getDownloadURL(fileRef);
-        return { id: uuidv4(), url, name: file.name };
-      })
-    );
+    try {
+      await fetch(`http://localhost:4000/upload/${albumId}`, {
+        method: 'POST',
+        body: formData,
+      });
 
-    setImages((prev) => [...prev, ...uploaded]);
+      await loadImages(); // Refresh image list after upload
+    } catch (err) {
+      console.error("Upload failed", err);
+    }
+
     setIsUploading(false);
   };
 
   const loadImages = async () => {
-    const listRef = ref(storage, `albums/${albumId}`);
-    const all = await listAll(listRef);
-    const fetched = await Promise.all(
-      all.items.map(async (itemRef) => {
-        const url = await getDownloadURL(itemRef);
-        return { id: uuidv4(), name: itemRef.name, url };
-      })
-    );
-    setImages(fetched);
+    try {
+      const res = await fetch(`http://localhost:4000/images/${albumId}`);
+      const data = await res.json();
+      setImages(data.map((img) => ({
+        id: uuidv4(),
+        name: img.name,
+        url: img.url,
+      })));
+    } catch (err) {
+      console.error("Failed to load images", err);
+    }
   };
 
-  // Optional: auto-load on mount
-  // useEffect(() => {
-  //   loadImages();
-  // }, []);
+  // Automatically load images when component mounts
+  useEffect(() => {
+    loadImages();
+  }, []);
 
   return (
     <div className="p-8 max-w-4xl mx-auto min-h-screen">
@@ -75,7 +80,7 @@ export default function PhotoGalleryDetail() {
         onClick={loadImages}
         className="mt-8 text-sm text-blue-500 underline"
       >
-        🔄 Load Images from Firebase
+        🔄 Refresh Gallery
       </button>
     </div>
   );

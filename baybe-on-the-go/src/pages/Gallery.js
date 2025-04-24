@@ -1,8 +1,50 @@
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { Plus, CalendarDays, Image as ImageIcon, FileText } from 'lucide-react';
+
+const defaultAlbums = [
+  {
+    id: 'album-1',
+    name: 'San Diego 2025',
+    date: 'May 15, 2025',
+    items: 24,
+  },
+  {
+    id: 'album-2',
+    name: 'Important Documents',
+    date: 'Updated recently',
+    items: 8,
+  },
+];
 
 export default function Gallery() {
   const navigate = useNavigate();
+
+  const [albums, setAlbums] = useState(() => {
+    const stored = localStorage.getItem('albums');
+    const parsed = stored ? JSON.parse(stored) : null;
+    return parsed && parsed.length > 0 ? parsed : defaultAlbums;
+
+  });
+
+  useEffect(() => {
+    localStorage.setItem('albums', JSON.stringify(albums));
+  }, [albums]);
+
+  const handleCreateAlbum = () => {
+    const name = prompt("Enter a name for your new album:");
+    if (!name) return;
+
+    const newAlbum = {
+      id: `album-${Date.now()}`,
+      name,
+      date: new Date().toLocaleDateString(),
+      items: 0,
+    };
+
+    setAlbums((prev) => [...prev, newAlbum]);
+    navigate(`/photo-gallery/${newAlbum.id}`, { state: { name } });
+  };
 
   const handleOpenAlbum = (albumId, name) => {
     navigate(`/photo-gallery/${albumId}`, { state: { name } });
@@ -16,11 +58,11 @@ export default function Gallery() {
           <p className="text-gray-500 text-sm">Organize your travel memories and important documents</p>
         </div>
         <div className="flex gap-2">
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-600">
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-600"
+            onClick={handleCreateAlbum}
+          >
             📁 New Album
-          </button>
-          <button className="bg-white border px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100">
-            ⬆️ Upload
           </button>
         </div>
       </div>
@@ -40,7 +82,10 @@ export default function Gallery() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Create Album Card */}
-        <div className="border-2 border-dashed border-blue-200 rounded-lg p-6 text-center hover:bg-blue-50 cursor-pointer">
+        <div
+          className="border-2 border-dashed border-blue-200 rounded-lg p-6 text-center hover:bg-blue-50 cursor-pointer"
+          onClick={handleCreateAlbum}
+        >
           <div className="text-blue-400 mx-auto w-fit mb-2">
             <Plus />
           </div>
@@ -48,37 +93,23 @@ export default function Gallery() {
           <p className="text-sm text-gray-400">Organize your photos and documents</p>
         </div>
 
-        {/* Album Card 1 */}
-        <div
-          className="bg-white rounded-lg shadow p-4 cursor-pointer hover:bg-blue-50"
-          onClick={() => handleOpenAlbum('album-1', 'San Diego 2025')}
-        >
-          <div className="h-24 bg-gray-100 rounded mb-3"></div>
-          <h3 className="font-semibold text-gray-800">San Diego 2025</h3>
-          <div className="flex items-center text-gray-500 text-sm mt-1">
-            <CalendarDays className="w-4 h-4 mr-1" /> May 15 – May 22, 2025
+        {/* Render album cards */}
+        {albums.map((album) => (
+          <div
+            key={album.id}
+            className="bg-white rounded-lg shadow p-4 cursor-pointer hover:bg-blue-50"
+            onClick={() => handleOpenAlbum(album.id, album.name)}
+          >
+            <div className="h-24 bg-gray-100 rounded mb-3"></div>
+            <h3 className="font-semibold text-gray-800">{album.name}</h3>
+            <div className="flex items-center text-gray-500 text-sm mt-1">
+              <CalendarDays className="w-4 h-4 mr-1" /> {album.date}
+            </div>
+            <div className="flex items-center text-gray-500 text-sm mt-1">
+              <ImageIcon className="w-4 h-4 mr-1" /> {album.items} items
+            </div>
           </div>
-          <div className="flex items-center text-gray-500 text-sm mt-1">
-            <ImageIcon className="w-4 h-4 mr-1" /> 24 items
-          </div>
-        </div>
-
-        {/* Album Card 2 */}
-        <div
-          className="bg-blue-50 rounded-lg shadow p-4 cursor-pointer hover:bg-blue-100"
-          onClick={() => handleOpenAlbum('album-2', 'Important Documents')}
-        >
-          <div className="flex justify-center items-center h-24">
-            <FileText className="w-10 h-10 text-blue-300" />
-          </div>
-          <h3 className="font-semibold text-gray-800">Important Documents</h3>
-          <div className="flex items-center text-gray-500 text-sm mt-1">
-            <FileText className="w-4 h-4 mr-1" /> Last updated: 2 days ago
-          </div>
-          <div className="flex items-center text-gray-500 text-sm mt-1">
-            <ImageIcon className="w-4 h-4 mr-1" /> 8 items
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
