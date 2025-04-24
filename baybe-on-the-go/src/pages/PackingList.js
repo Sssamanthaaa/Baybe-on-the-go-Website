@@ -1,5 +1,6 @@
 import { useReducer, useState } from 'react';
-import { ChevronDown, ChevronUp, X, Plus, Send } from 'lucide-react';
+import { ChevronDown, ChevronUp, X, Plus, Send, FileImage, Check } from 'lucide-react';
+import ImageUploadDialog from '../components/ImageUploadDialog';
 
 const initialState = {
   bags: [
@@ -63,7 +64,8 @@ const DELETE_ITEM = 'DELETE_ITEM';
 const ADD_ITEM = 'ADD_ITEM';
 const ADD_BAG = 'ADD_BAG';
 const DELETE_BAG = 'DELETE_BAG';
-const SET_STATE = 'SET_STATE';
+export const SET_STATE = 'SET_STATE';
+const RENAME_BAG = 'RENAME_BAG';
 
 // Reducer function
 function packingListReducer(state, action) {
@@ -150,6 +152,16 @@ function packingListReducer(state, action) {
 
     case SET_STATE:
       return action.newState;
+
+    case RENAME_BAG:
+      return {
+        ...state,
+        bags: state.bags.map(bag => 
+          bag.id === action.bagId 
+            ? { ...bag, bagName: action.newName } 
+            : bag
+        )
+      };
       
     default:
       return state;
@@ -158,12 +170,22 @@ function packingListReducer(state, action) {
 
 const PackingList = () => {
   const [state, dispatch] = useReducer(packingListReducer, initialState);
+  // for creating new items within a bag
   const [newItemText, setNewItemText] = useState('');
+  // for renaming bags
+  const [renamingBagId, setRenamingBagId] = useState(null);
+  const [renameInput, setRenameInput] = useState('');
+
   const [bottomInputText, setBottomInputText] = useState('');
   const [previousState, setPreviousState] = useState(null);
+  // for displaying responses/errors
   const [responseMessage, setResponseMessage] = useState('');
   const [showError, setShowError] = useState(false);
+
+  // loading for AI text prompt
   const [isLoading, setIsLoading] = useState(false);
+  // dialog for AI image prompt
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   
   /* Global Metrics */
   const totalItems = state.bags.reduce((total, bag) => total + bag.bagItems.length, 0);
@@ -206,6 +228,7 @@ const PackingList = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!bottomInputText) return;
     setShowError(false);
     setResponseMessage('');
     setIsLoading(true);
@@ -235,9 +258,11 @@ const PackingList = () => {
         return;
       }
 
-      // Save current state for undo
+      if (textResponse !== "I don't quite understand your prompt") {
       setPreviousState(state);
       dispatch({ type: SET_STATE, newState: JSON.parse(updatedState) });
+      }
+
       setResponseMessage(textResponse);
     } catch (error) {
       setShowError(true);
@@ -253,6 +278,18 @@ const PackingList = () => {
       setPreviousState(null);
       setResponseMessage('');
     }
+  };
+
+  const renameBag = (bagId, newName) => {
+    setResponseMessage('');
+    dispatch({ type: RENAME_BAG, bagId, newName });
+    setRenamingBagId(null);
+    setRenameInput('');
+  };
+
+  const startRenaming = (bagId, currentName) => {
+    setRenamingBagId(bagId);
+    setRenameInput(currentName);
   };
 
   return (
@@ -293,7 +330,43 @@ const PackingList = () => {
                   className="flex-grow cursor-pointer"
                   onClick={() => toggleBagVisibility(bag.id)}
                 >
-                  <h3 className="font-medium">{bag.bagName}</h3>
+                  {renamingBagId === bag.id ? (
+                    <div className="flex items-center">
+                      <input
+                        type="text"
+                        value={renameInput}
+                        onChange={(e) => setRenameInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            renameBag(bag.id, renameInput);
+                          }
+                        }}
+                        className="border rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        autoFocus
+                      />
+                      <button
+                        onClick={() => renameBag(bag.id, renameInput)}
+                        className="ml-2 text-green-500 hover:text-green-700"
+                      >
+                        <Check className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center">
+                      <h3 className="font-medium">{bag.bagName}</h3>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startRenaming(bag.id, bag.bagName);
+                        }}
+                        className="ml-2 text-gray-400 hover:text-gray-600"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                   <p className="text-sm text-gray-500">{bagPacked}/{bagTotal} packed</p>
                 </div>
                 <div className="flex items-center">
@@ -372,19 +445,47 @@ const PackingList = () => {
 
       {/* Bottom Input Field */}
       <div className="mt-8 border-t pt-4">
-        <form onSubmit={handleSubmit} className="flex items-center rounded-lg border overflow-hidden">
-          <input
-            type="text"
+        <div className="group relative inline-block">
+          <p className="cursor-help font-semibold text-blue-500 hover:text-blue-700">Use AI to help you pack!</p>
+          <div className="absolute left-0 top-full mt-2 w-64 p-2 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+            <p>You can either use the text input field to make changes to your packing list, whether that be shifting items around between your bags or checking off items.</p>
+            <p className="mt-2">You can also upload an image of a bunch of items you're about to pack, and those items will be checked off!</p>
+          </div>
+        </div>
+        <form onSubmit={handleSubmit} className="flex-col rounded-lg border overflow-hidden mt-4">
+          <textarea
             placeholder="Ask for changes to the packing list (eg. 'I don't have enough bags' or 'check off my Jacket in Large Suitcase 1')"
-            className="flex-1 px-4 py-2 focus:outline-none text-sm"
+            className="w-full px-4 py-2 focus:outline-none text-sm resize-none"
             value={bottomInputText}
             onChange={(e) => setBottomInputText(e.target.value)}
           />
-          <button type="submit" className="bg-blue-500 text-white p-2 rounded-full m-1">
-            <Send className="h-5 w-5" />
-          </button>
+          <div className="flex justify-between">
+            <button 
+              onClick={(e) => {
+                e.preventDefault();
+                setIsDialogOpen(true);
+              }} 
+              className="m-2"
+            >
+              <FileImage className="h-5 w-5" />
+            </button>
+            <button type="submit" className="bg-blue-500 text-white p-2 rounded-full m-2">
+              <Send className="h-5 w-5" />
+            </button>
+          </div>
         </form>
       </div>
+
+      {/* Image Upload Dialog */}
+      <ImageUploadDialog 
+        isOpen={isDialogOpen} 
+        onClose={() => setIsDialogOpen(false)}
+        currentState={state}
+        dispatch={dispatch}
+        setShowError={setShowError}
+        setResponseMessage={setResponseMessage}
+        setPreviousState={setPreviousState}
+      />
 
       {/* Response Message */}
       {(responseMessage || showError || isLoading) && (
