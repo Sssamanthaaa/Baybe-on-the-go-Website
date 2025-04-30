@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Pencil, Plus, Minus } from 'lucide-react';
+import { Pencil, Plus, Minus, X } from 'lucide-react';
 
 const DashboardTrip = () => {
   
@@ -97,6 +97,28 @@ const DashboardTrip = () => {
               </div>  
             </div>  
           </div> 
+
+          <h2 className="text-lg font-bold">Tags</h2>
+          <div className="space-y-4">  
+            {/* Tags */}
+            <div className="grid grid-rows-[auto_1fr] gap-4 items-start">
+              <div className="flex space-x-1">
+                <button className="bg-green-200 hover:bg-green-300 text-green-700 px-2 py-1 rounded-full flex items-center">
+                  Family-Friendly <X className="text-green-500" size={18} />
+                </button>
+                <button className="bg-blue-200 hover:bg-blue-300 text-blue-700 px-2 py-1 rounded-full flex items-center">
+                  Beach <X className="text-blue-500" size={18} />
+                </button>
+                <button className="bg-purple-200 hover:bg-purple-300 text-purple-700 px-2 py-1 rounded-full flex items-center">
+                  With Infant <X className="text-purple-500" size={18} />
+                </button>
+                <button className="bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded-full flex items-center">
+                  Add <Plus className="text-gray-500" size={18} />
+                </button>
+              </div>
+            </div>
+          </div>
+
     
           {/* Trip Details */}
             {/* Rows of Item-ValueBox-EditIcon*/}

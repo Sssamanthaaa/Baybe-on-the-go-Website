@@ -46,7 +46,7 @@ const Dashboard = () => {
                   </div>
                 </div>
 
-                <div className="gap-4">
+                <div className="flex space-x-1">
                   <span className="bg-green-200 px-2 py-1 rounded-full">Family-Friendly</span>
                   <span className="bg-blue-200 px-2 py-1 rounded-full">Beach</span>
                   <span className="bg-purple-200 px-2 py-1 rounded-full">With Infant</span>
