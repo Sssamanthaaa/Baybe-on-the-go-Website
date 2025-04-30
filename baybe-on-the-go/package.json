@@ -10,13 +10,9 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
-<<<<<<< HEAD
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "firebase": "^11.6.0",
-=======
-    "firebase": "^11.6.1",
->>>>>>> a22a6b0 (WIP: progress on login page)
     "lucide-react": "^0.488.0",
     "multer": "^1.4.5-lts.2",
     "react": "^19.1.0",
