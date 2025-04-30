@@ -9,6 +9,8 @@ import Gallery from './pages/Gallery';
 import PhotoGalleryDetail from './pages/PhotoGalleryDetail';
 import Dashboard from './pages/Dashboard';
 import DashboardTrip from './pages/DashboardTrip';
+import Login from './pages/Login'; 
+import SignUp from './pages/SignUp'; 
 
 const NotFound = () => (
   <div className="w-full text-center">
@@ -26,6 +28,7 @@ function App() {
           <main className="flex-1 overflow-y-auto p-4">
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
               <Route path="/packing-list" element={<PackingList />} />
               <Route path="/documentation" element={<DocUpload/>} />
               <Route path="/photo-gallery" element={<Gallery />} />
@@ -33,6 +36,7 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard/trip" element={<DashboardTrip />} />
               <Route path="*" element={<NotFound />} />
+              <Route path="/signup" element={<SignUp />} />
             </Routes>
           </main>
         </div>
