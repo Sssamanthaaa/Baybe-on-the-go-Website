@@ -24,7 +24,7 @@ const DashboardTrip = () => {
               {/* Trip Name */}
               <div className="grid grid-cols-[125px_1fr_auto] gap-4 items-center">
                 <span className="font-medium text-gray-900">Trip Name</span>
-                <div className="bg-gray-200 px-3 py-1 rounded-full">San Diego Family Vacation</div>
+                <div className="bg-gray-200 px-3 py-1 rounded-full">Bay Area Family Vacation</div>
                 <button className="bg-blue-100 hover:bg-blue-200 p-2 rounded-full flex items-center justify-center">
                   <Pencil className="text-blue-500" size={18} />
                 </button>

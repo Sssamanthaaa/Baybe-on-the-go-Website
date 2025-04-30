@@ -32,17 +32,17 @@ const Dashboard = () => {
               <div className="space-y-4"> 
                 <div className="space-y-2"> 
                   <div className="flex items-center gap-4">
-                    <span className="font-medium text-gray-900">San Diego Family Vacation</span>
+                    <span className="font-medium text-gray-900">Bay Area Family Vacation</span>
                   </div>
 
                   <div className="flex items-center gap-4">
                     <Clock className="text-gray-500" size={20} />
-                    <span className="text-gray-500">May 15 - May 22, 2025</span>
+                    <span className="text-gray-500">May 2 - 9, 2025</span>
                   </div>
 
                   <div className="flex items-center gap-4">
                     <MapPin className="text-gray-500" size={20} />
-                    <span className="text-gray-500">La Jolla, San Diego</span>
+                    <span className="text-gray-500">San Francisco, California</span>
                   </div>
                 </div>
 
