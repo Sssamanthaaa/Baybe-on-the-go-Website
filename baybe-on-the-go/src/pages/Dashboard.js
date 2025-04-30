@@ -1,9 +1,16 @@
 import React from 'react';
 import { Calendar, Clock, MapPin, Upload } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
+
+  const nav = useNavigate();
+  const viewTrip = () => {
+    nav('/dashboard/trip')
+  };
+
   return (
-    <div className="p-10 space-y-10">
+    <div className="p-10 space-y-5">
       <h1 className="text-2xl font-bold">Dashboard</h1>
 
       <div className="space-y-5">
@@ -49,10 +56,10 @@ const Dashboard = () => {
             </div>
 
             <div className="flex gap-4">
-              <button className="flex-1 flex flex-col items-center gap-2 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-2xl">
+              <button onClick={viewTrip} className="flex-1 flex flex-col items-center gap-2 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-2xl">
                 Edit Trip
               </button>
-              <button className="flex-1 flex flex-col items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-2xl">
+              <button onClick={viewTrip} className="flex-1 flex flex-col items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-2xl">
                 View Details
               </button>
             </div>

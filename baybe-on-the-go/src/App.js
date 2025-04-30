@@ -8,7 +8,7 @@ import Sidebar from './components/Sidebar';
 import Gallery from './pages/Gallery';
 import PhotoGalleryDetail from './pages/PhotoGalleryDetail';
 import Dashboard from './pages/Dashboard';
-
+import DashboardTrip from './pages/DashboardTrip';
 
 const NotFound = () => (
   <div className="w-full text-center">
@@ -31,6 +31,7 @@ function App() {
               <Route path="/photo-gallery" element={<Gallery />} />
               <Route path="/photo-gallery/:albumId" element={<PhotoGalleryDetail />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard/trip" element={<DashboardTrip />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
