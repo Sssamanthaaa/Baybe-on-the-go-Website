@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Upload } from 'lucide-react';
 import { SET_STATE } from '../pages/PackingList';
+import ScanningOverlay from './ScanningOverlay'
 
 // Image Upload Dialog Component
 export default function ImageUploadDialog({ isOpen, onClose, currentState, dispatch, setShowError, setResponseMessage, setPreviousState }) {
@@ -126,11 +127,21 @@ export default function ImageUploadDialog({ isOpen, onClose, currentState, dispa
             <div className="mt-4">
               <p className="text-sm font-bold text-gray-700 mb-2">Preview:</p>
               <div className="bg-gray-100 p-2 rounded flex justify-center">
-                <img 
-                  src={preview} 
-                  alt="Preview" 
-                  className="max-h-64 max-w-full object-contain"
-                />
+                {isUploading ? (
+                  <ScanningOverlay>
+                    <img 
+                      src={preview} 
+                      alt="Preview" 
+                      className="max-h-64 max-w-full object-contain block"
+                    />
+                  </ScanningOverlay>
+                ) : (
+                  <img 
+                    src={preview} 
+                    alt="Preview" 
+                    className="max-h-64 max-w-full object-contain block"
+                  />
+                )}
               </div>
             </div>
           )}

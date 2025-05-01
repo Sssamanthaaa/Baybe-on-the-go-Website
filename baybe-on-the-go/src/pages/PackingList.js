@@ -335,8 +335,8 @@ const PackingList = () => {
                 className="flex items-center justify-between p-4"
               >
                 <div 
-                  className="flex-grow cursor-pointer"
-                  onClick={() => toggleBagVisibility(bag.id)}
+                  className={`flex-grow ${isLoading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                  onClick={() => !isLoading && toggleBagVisibility(bag.id)}
                 >
                   {renamingBagId === bag.id ? (
                     <div className="flex items-center">
@@ -351,10 +351,12 @@ const PackingList = () => {
                         }}
                         className="border rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
                         autoFocus
+                        disabled={isLoading}
                       />
                       <button
                         onClick={() => renameBag(bag.id, renameInput)}
                         className="ml-2 text-green-500 hover:text-green-700"
+                        disabled={isLoading}
                       >
                         <Check className="h-4 w-4" />
                       </button>
@@ -368,6 +370,7 @@ const PackingList = () => {
                           startRenaming(bag.id, bag.bagName);
                         }}
                         className="ml-2 text-gray-400 hover:text-gray-600"
+                        disabled={isLoading}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -381,10 +384,14 @@ const PackingList = () => {
                   <button 
                     onClick={() => {deleteBag(bag.id)}}
                     className="text-gray-400 hover:text-red-500 mr-2"
+                    disabled={isLoading}
                   >
                     <X className="h-5 w-5" />
                   </button>
-                  <button onClick={() => toggleBagVisibility(bag.id)}>
+                  <button 
+                    onClick={() => toggleBagVisibility(bag.id)}
+                    disabled={isLoading}
+                  >
                     {bag.bagHidden ? <ChevronDown className="h-5 w-5" /> : <ChevronUp className="h-5 w-5" />}
                   </button>
                 </div>
@@ -402,12 +409,14 @@ const PackingList = () => {
                             checked={item.checked}
                             onChange={() => toggleItemChecked(bag.id, item.id)}
                             className="h-4 w-4 rounded border-gray-300 text-blue-600"
+                            disabled={isLoading}
                           />
-                          <span className="ml-3">{item.itemName}</span>
+                          <span className={`ml-3 ${isLoading ? 'opacity-50' : ''}`}>{item.itemName}</span>
                         </div>
                         <button 
                           onClick={() => deleteItem(bag.id, item.id)}
                           className="text-gray-400 hover:text-gray-600"
+                          disabled={isLoading}
                         >
                           <X className="h-5 w-5" />
                         </button>
@@ -420,7 +429,7 @@ const PackingList = () => {
                     <input
                       type="text"
                       placeholder="Add new item..."
-                      className="flex-1 border rounded-l-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      className={`flex-1 border rounded-l-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 ${isLoading ? 'bg-gray-100' : ''}`}
                       value={newItemText}
                       onChange={(e) => setNewItemText(e.target.value)}
                       onKeyDown={(e) => {
@@ -428,10 +437,12 @@ const PackingList = () => {
                           addItemToBag(bag.id, newItemText);
                         }
                       }}
+                      disabled={isLoading}
                     />
                     <button
                       onClick={() => addItemToBag(bag.id, newItemText)}
-                      className="bg-blue-500 text-white px-3 py-2 rounded-r-md hover:bg-blue-600"
+                      className={`bg-blue-500 text-white px-3 py-2 rounded-r-md ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'}`}
+                      disabled={isLoading}
                     >
                       <Plus className="h-5 w-5" />
                     </button>
@@ -446,7 +457,8 @@ const PackingList = () => {
       {/* Add New Bag Button */}
       <button
         onClick={addNewBag}
-        className="mt-4 w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 flex items-center justify-center"
+        className={`mt-4 w-full bg-blue-500 text-white py-2 rounded-md ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'} flex items-center justify-center`}
+        disabled={isLoading}
       >
         <Plus className="h-5 w-5 mr-1" /> Add New Bag
       </button>
@@ -454,7 +466,7 @@ const PackingList = () => {
       {/* Bottom Input Field */}
       <div className="mt-8 border-t pt-4">
         <div className="group relative inline-block">
-          <p className="cursor-help font-semibold text-blue-500 hover:text-blue-700">Use AI to help you pack!</p>
+          <p className={`cursor-help font-semibold text-blue-500 ${isLoading ? 'opacity-50' : 'hover:text-blue-700'}`}>Use AI to help you pack!</p>
           <div className="absolute left-0 top-full mt-2 w-64 p-2 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
             <p>You can either use the text input field to make changes to your packing list, whether that be shifting items around between your bags or checking off items.</p>
             <p className="mt-2">You can also upload an image of a bunch of items you're about to pack, and those items will be checked off!</p>
@@ -463,9 +475,10 @@ const PackingList = () => {
         <form onSubmit={handleSubmit} className="flex-col rounded-lg border overflow-hidden mt-4">
           <textarea
             placeholder="Ask for changes to the packing list (eg. 'I don't have enough bags' or 'check off my Jacket in Large Suitcase 1')"
-            className="w-full px-4 py-2 focus:outline-none text-sm resize-none"
+            className={`w-full px-4 py-2 focus:outline-none text-sm resize-none ${isLoading ? 'bg-gray-100' : ''}`}
             value={bottomInputText}
             onChange={(e) => setBottomInputText(e.target.value)}
+            disabled={isLoading}
           />
           <div className="flex justify-between">
             <button 
@@ -473,11 +486,16 @@ const PackingList = () => {
                 e.preventDefault();
                 setIsDialogOpen(true);
               }} 
-              className="m-2"
+              className={`m-2 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isLoading}
             >
               <FileImage className="h-5 w-5" />
             </button>
-            <button type="submit" className="bg-blue-500 text-white p-2 rounded-full m-2">
+            <button 
+              type="submit" 
+              className={`bg-blue-500 text-white p-2 rounded-full m-2 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={isLoading}
+            >
               <Send className="h-5 w-5" />
             </button>
           </div>
