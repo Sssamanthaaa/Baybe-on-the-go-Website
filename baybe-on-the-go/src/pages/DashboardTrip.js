@@ -11,6 +11,7 @@ const UPDATE_NUM_CHILDREN = 'UPDATE_NUM_CHILDREN';
 const UPDATE_NUM_INFANTS = 'UPDATE_NUM_INFANTS';
 const ADD_TAG = 'ADD_TAG';
 const REMOVE_TAG = 'REMOVE_TAG';
+const UPDATE_ALL_TAGS = 'UPDATE_ALL_TAGS';
 
 // Initial state
 const initialState = {
@@ -165,6 +166,12 @@ function tripReducer(state, action) {
           }
         };
       }
+
+      case UPDATE_ALL_TAGS:
+        return {
+          ...state,
+          tags: action.payload
+        };
       
     default:
       return state;
@@ -181,6 +188,7 @@ const DashboardTrip = () => {
   const [isAddingDestination, setIsAddingDestination] = useState(false);
   const [newDestination, setNewDestination] = useState('');
   const [openDropdown, setOpenDropdown] = useState(false);
+  const [isAILoading, setIsAILoading] = useState(false);
 
   // Handler functions
   const handleUpdateTripName = (newName) => {
@@ -219,6 +227,48 @@ const DashboardTrip = () => {
     };
     
     return colorMap[category] || "bg-gray-200 hover:bg-gray-300 text-gray-700";
+  };
+
+  const suggestTags = async () => {
+    //filter out tags to pass into noggin
+    const { tags, ...filteredState } = state;
+    try {
+      setOpenDropdown(false);
+      setIsAILoading(true);
+      
+      // Example API call with the image as data URL
+      const response = await fetch(
+        'https://noggin.rea.gent/wild-raccoon-2522',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer rg_v1_wyc8bd9m6nqrvfb6bhsu5gu2pwuc4jabfbqc_ngk',
+          },
+          body: JSON.stringify({
+            "tripDetails": filteredState,
+          }),
+        }
+      );
+      
+      const responseData = await response.json();
+      
+      // Update all tags with the response data
+      dispatch({ 
+        type: UPDATE_ALL_TAGS, 
+        payload: {
+          duration: Array.isArray(responseData.duration) ? responseData.duration : [responseData.duration],
+          environment: Array.isArray(responseData.environment) ? responseData.environment : [responseData.environment],
+          activityLevel: Array.isArray(responseData.activityLevel) ? responseData.activityLevel : [responseData.activityLevel],
+          budget: Array.isArray(responseData.budget) ? responseData.budget : [responseData.budget]
+        }
+      });
+      
+    } catch (error) {
+      console.error('Error suggesting tags:', error);
+    } finally {
+      setIsAILoading(false);
+    }
   };
   
   return (
@@ -442,7 +492,49 @@ const DashboardTrip = () => {
           </div>
 
           {/* Tags */}
-          <h2 className="text-lg font-bold">Tags</h2>
+          <div className="flex items-center">
+            <h2 className="text-lg font-bold">Tags</h2>
+            {/* AI Suggest Button (with fancy gradient background!!) */}
+            <button
+              className="relative overflow-hidden text-white font-bold px-4 py-1 ml-5 rounded-md flex items-center gap-2 transition-all duration-300"
+              onClick={suggestTags}
+              disabled={isAILoading}
+              style={{
+                background: 'linear-gradient(-45deg, #3490dc, #4299e1, #38b2ac, #3182ce)',
+                backgroundSize: '400% 400%',
+                animation: 'gradient 5s ease infinite'
+              }}
+            >
+              <style jsx>{`
+                @keyframes gradient {
+                  0% {
+                    background-position: 0% 50%;
+                  }
+                  50% {
+                    background-position: 100% 50%;
+                  }
+                  100% {
+                    background-position: 0% 50%;
+                  }
+                }
+              `}</style>
+              <span className="relative z-10">
+                {isAILoading ? (
+                  <>
+                    <span className="animate-spin inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
+                    Suggesting...
+                  </>
+                ) : (
+                  <>
+                    <span>AI Suggest Tags</span>
+                  </>
+                )}
+              </span>
+              <div 
+                className={`absolute inset-0 transition-opacity duration-300 ${isAILoading ? 'opacity-50 bg-gray-700' : 'opacity-0'}`}
+              ></div>
+            </button>
+          </div>
           <div className="space-y-4 p-6">
             {/* All selected tags in a single row */}
             <div className="flex flex-wrap gap-2 mb-4">
@@ -452,6 +544,7 @@ const DashboardTrip = () => {
                     key={`${category}-${tag}`}
                     className={`${getTagColorClasses(category)} px-2 py-1 rounded-full flex items-center`}
                     onClick={() => handleRemoveTag(category, tag)}
+                    disabled={isAILoading}
                   >
                     {tag} <X className="ml-1" size={18} />
                   </button>
@@ -464,6 +557,7 @@ const DashboardTrip = () => {
               <button 
                 className="bg-gray-200 hover:bg-gray-300 px-3 py-2 rounded-md flex items-center gap-2"
                 onClick={() => setOpenDropdown(!openDropdown)}
+                disabled={isAILoading}
               >
                 Add Tag <ChevronDown size={18} />
               </button>
