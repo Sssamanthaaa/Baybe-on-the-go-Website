@@ -7,7 +7,9 @@ import {
   CheckIcon,
   AlertCircleIcon,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
+import {createUserWithEmailAndPassword, updateProfile} from 'firebase/auth';
+import { auth } from '../firebase'; 
 
 const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -54,12 +56,21 @@ const SignUp = () => {
     }
 
     setIsLoading(true);
-    setTimeout(() => {
-      console.log('Account created:', formData);
-      setIsLoading(false);
-      navigate('/');
-    }, 1000);
-  };
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+        //setting username in profile
+        await updateProfile(userCredential.user, {
+            displayName: formData.fullName,
+        });
+        console.log('Trying login with:', formData.email, formData.password);
+        alert('Account created successfully!');
+        navigate('/login');
+      } catch (error) {
+        alert('Sign up failed: ' + error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">

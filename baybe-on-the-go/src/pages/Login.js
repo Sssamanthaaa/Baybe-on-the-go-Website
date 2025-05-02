@@ -3,6 +3,7 @@ import {BabyIcon, EyeIcon, EyeOffIcon, Loader2Icon} from 'lucide-react';
 import {Link, useNavigate} from 'react-router-dom';
 import {auth} from '../firebase'; 
 import {GoogleAuthProvider, signInWithPopup} from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 
 const Login = () => {
@@ -18,19 +19,14 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-      setTimeout(() => {
-      const { email, password } = formData;
-  
-      //tesing account
-      if (email === 'test@example.com' && password === '1234') {
-        alert('Login successful!');
-        navigate("/");
-      } else {
-        alert('Invalid credentials');
+      try {
+        await signInWithEmailAndPassword(auth, formData.email, formData.password);
+        navigate('/dashboard');
+      } catch (error) {
+        alert('Login failed: ' + error.message);
+      } finally {
+        setIsLoading(false);
       }
-  
-      setIsLoading(false);
-    }, 1000);
   };
   
 
@@ -40,7 +36,7 @@ const Login = () => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       console.log('Google login success:', user);
-      navigate('/'); 
+      navigate('/dashboard'); 
     } catch (error) {
       console.error('Google login failed:', error.message);
       alert('Google login failed: ' + error.message);
