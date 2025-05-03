@@ -27,7 +27,9 @@ const Sidebar = () => {
     });
     return () => unsubscribe();
   }, [location.pathname]);
-
+  if (location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/') {
+    return null;
+  }
   const menuItems = [
     { path: '/dashboard', label: 'Dashboard', icon: <HomeIcon/> },
     { path: '/photo-gallery', label: 'Photo Gallery', icon: <ImageIcon/> },
