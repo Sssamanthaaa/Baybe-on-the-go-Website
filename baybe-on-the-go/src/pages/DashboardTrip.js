@@ -1,5 +1,6 @@
 import { useReducer, useState } from 'react';
-import { Pencil, Plus, Minus, X, ChevronDown } from 'lucide-react';
+import { Pencil, Plus, Minus, X, ChevronDown, ArrowBigLeft, Undo2} from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // Action types
 const UPDATE_TRIP_NAME = 'UPDATE_TRIP_NAME';
@@ -270,10 +271,20 @@ const DashboardTrip = () => {
       setIsAILoading(false);
     }
   };
+
+  // Back Button
+  const nav = useNavigate();
+  const backToMain = () => nav('/dashboard');
   
   return (
     <div className="p-10 space-y-5">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
+      <div className="flex justify-between">
+        <h1 className="text-2xl font-bold">Trip Dashboard</h1>
+        <button onClick={backToMain} className="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded-full flex items-center gap-2 text-white">
+          <span> Back To Main Dashboard </span>
+          <Undo2 size={20}/>
+        </button>
+      </div>
       <div className="space-y-5">
         <div className="bg-gray-50 p-6 rounded-2xl">
           <h2 className="text-lg font-bold">Trip Details</h2>
