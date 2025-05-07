@@ -9,6 +9,7 @@ import Gallery from './pages/Gallery';
 import PhotoGalleryDetail from './pages/PhotoGalleryDetail';
 import Dashboard from './pages/Dashboard';
 import DashboardTrip from './pages/DashboardTrip';
+import DashboardView from './pages/DashboardView';
 import Login from './pages/Login'; 
 import SignUp from './pages/SignUp'; 
 
@@ -35,6 +36,7 @@ function App() {
               <Route path="/photo-gallery/:albumId" element={<PhotoGalleryDetail />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard/trip" element={<DashboardTrip />} />
+              <Route path="/dashboard/view" element={<DashboardView />} />
               <Route path="*" element={<NotFound />} />
               <Route path="/signup" element={<SignUp />} />
             </Routes>

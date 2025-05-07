@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const nav = useNavigate();
-  const viewTrip = () => nav('/dashboard/trip');
+  const viewTrip = () => nav('/dashboard/view');
+  const editTrip = () => nav('/dashboard/trip');
 
   const [notes, setNotes] = useState(() => {
     const stored = localStorage.getItem('dashboardNotes');
@@ -57,7 +58,7 @@ const Dashboard = () => {
         </div>
 
         <div className="flex gap-4 mt-6">
-          <button onClick={viewTrip} className="flex-1 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-2xl">
+          <button onClick={editTrip} className="flex-1 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-2xl">
             Edit Trip
           </button>
           <button onClick={viewTrip} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-2xl">
