@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/Baybe-on-the-go-Website/static/css/main.3d57b93a.css",
-    "main.js": "/Baybe-on-the-go-Website/static/js/main.fa94d7e9.js",
+    "main.js": "/Baybe-on-the-go-Website/static/js/main.6d5441cf.js",
     "static/js/453.24141398.chunk.js": "/Baybe-on-the-go-Website/static/js/453.24141398.chunk.js",
     "index.html": "/Baybe-on-the-go-Website/index.html",
     "main.3d57b93a.css.map": "/Baybe-on-the-go-Website/static/css/main.3d57b93a.css.map",
-    "main.fa94d7e9.js.map": "/Baybe-on-the-go-Website/static/js/main.fa94d7e9.js.map",
+    "main.6d5441cf.js.map": "/Baybe-on-the-go-Website/static/js/main.6d5441cf.js.map",
     "453.24141398.chunk.js.map": "/Baybe-on-the-go-Website/static/js/453.24141398.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.3d57b93a.css",
-    "static/js/main.fa94d7e9.js"
+    "static/js/main.6d5441cf.js"
   ]
 }
